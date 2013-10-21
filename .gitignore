@@ -10,3 +10,5 @@ test-output/
 .classpath
 .project
 /.settings
+.gradle/
+build/

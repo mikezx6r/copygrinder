@@ -1,0 +1,56 @@
+defaultTasks 'build'
+
+apply plugin:'scala'
+
+group = 'org.copygrinder' // organization := "org.copygrinder"
+
+version = 0.1 // version := "0.1"
+
+// resolvers
+repositories {
+	mavenCentral()
+	maven{name 'spray repo'
+		url 'http://repo.spray.io'}
+	maven{name 'JGit repo'
+		url 'https://repo.eclipse.org/content/groups/releases'}
+}
+
+ext {scalaVersion = '2.10.3'  //scalaVersion := "2.10.3"
+     scalaDep = '2.10'
+     akkaVersion = '2.2.0-RC1'
+     sprayVersion = '1.2-M8'
+
+	scalaLibs =["com.typesafe.akka:akka-actor_$scalaDep:$akkaVersion",
+				"io.spray:spray-can:$sprayVersion",
+				"io.spray:spray-routing:$sprayVersion"
+				]
+	javaLibs = ["org.eclipse.jgit:org.eclipse.jgit:3.1.0.201310021548-r",
+				"commons-io:commons-io:2.4"
+				]
+}
+
+dependencies {
+	compile "org.scala-lang:scala-library:$ext.scalaVersion"
+	compile scalaLibs
+	compile javaLibs
+
+	testCompile("org.specs2:specs2_$scalaDep:2.2.2",
+		"org.scalatest:scalatest_$scalaDep:2.0.RC2",
+		"org.scalamock:scalamock-scalatest-support_$scalaDep:3.0.1",
+		"io.spray:spray-testkit:$sprayVersion",
+		"com.typesafe.akka:akka-testkit_$scalaDep:$akkaVersion"
+	)
+}
+
+// run Scalatest tests
+test << {
+    ant.taskdef(name: 'scalatest', classname: 'org.scalatest.tools.ScalaTestAntTask', classpath: classpath.asPath)
+    ant.scalatest(runpath: testClassesDir, haltonfailure: 'true', fork: 'false') { reporter(type: 'stdout') }
+}
+
+test.testLogging.exceptionFormat = 'full'
+
+// uses the Zinc external compiler which also provides incremental compilation
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.useAnt = false
+}
